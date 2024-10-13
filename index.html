@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiberationKG: A Knowledge Graph of Bangladesh Liberation War</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+        }
+
+        .box {
+            width: 45%;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+        .questions li, .sparql-box , .result-box 
+        {
+            border-bottom: 3px solid rgb(30, 11, 85);
+            padding: 10px 12px;
+            border-radius: 10px;
+            box-shadow: gray -2px -3px 5px;}
+        .questions {
+            list-style-type: none;
+            padding: 0;
+        }
+        .questions li {
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .sparql-box {
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .execute-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .execute-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .execute-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Result Box Styles */
+        .result-box {
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #e6f7ff;
+        }
+        table, th, td {
+            border: 1px solid black;
+            }
+        td,th{
+            padding: 6px 8px;
+            font-size: 18px;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LiberationKG: A Knowledge Graph of Bangladesh Liberation War from Newspaper Articles</h1>
+    </header>
+
+    <div class="container">
+        <!-- Question Box -->
+        <div class="box">
+            <h2>Questions</h2>
+            <ul class="questions" id="questions-list">
+                <li data-query="0">Who was General Agha Mohammed Yahya Khan?</li>
+                <li data-query='1'>Who was the U.S. Secretary of State during the 1971 Liberation War?</li>
+                <li data-query="2">Who was the Prime Minister of India during the 1971 Liberation War?</li>
+                <li data-query="3">Who was the acting President of Bangladesh after its independence?</li>
+                <li data-query="4">Which two countries were involved in the potential border conflict mentioned in the document?</li>
+                <!-- <li data-query="5">When Yahya became president and when did he resign? -->
+                </li>
+            </ul>
+        </div>
+
+        <!-- SPARQL Query Box -->
+        <div class="box">
+            <div class="query" id="query">
+                <h2>SPARQL Query</h2>
+            <div id="sparql-query-box" class="sparql-box">
+                Select a question to see the SPARQL query.
+            </div>
+
+            <!-- Button to execute the SPARQL query -->
+            <button class="execute-btn" id="execute-btn">
+                Execute Query
+            </button>
+            </div>
+
+            <!-- Box to show the result of the query -->
+            <div id="result-box" class="result-box">
+                Query result will be displayed here.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle question selection and display SPARQL query
+        const questionsList = document.getElementById('questions-list');
+        const sparqlQueryBox = document.getElementById('sparql-query-box');
+        const resultBox = document.getElementById('result-box');
+        const executeButton = document.getElementById('execute-btn');
+        const query = document.getElementById('query');
+        resultBox.style.display = 'none'
+        let selectedQuery = '';
+        executeButton.textContent = 'Select a Question';
+
+        const queries = [
+            'PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br>PREFIX schema:&lt;http://schema.org/&gt;<br><br>SELECT *<br>WHERE {<br>liberation:AghaMohammedYahyaKhan schema:description ?Description<br>}',
+            'PREFIX schema: &lt;http://schema.org/&gt;<br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT *<br>WHERE {<br>  ?Person schema:jobTitle "Consul-General" .<br>  ?Person schema:name ?Name<br>}',
+            'PREFIX schema: &lt;http://schema.org/&gt; <br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT *<br>WHERE {<br>  ?PrimeMinister schema:jobTitle "Prime Minister of India" .<br>  ?PrimeMinister schema:name ?Name<br>}',
+            'PREFIX schema:&lt;http://schema.org/&gt;<br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT *<br>WHERE{<br>liberation:actingPresident schema:memberOf liberation:bangladeshGovernment.<br>liberation:actingPresident schema:name ?Name.<br>}',
+            'PREFIX schema: &lt;http://schema.org/&gt;<br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT ?Namer>WHERE {<br>  liberation:borderClash schema:location ?country .<br>  ?country schema:name ?Name<br>}',
+            // 'PREFIX liberation: &lt;http://bike-csecu.com/datasets/liberation/&gt;<br>PREFIX schema: &lt;http://schema.org/&gt;<br>PREFIX wdt: &lt;http://www.wikidata.org/prop/direct/&gt;<br><br>SELECT *<br>WHERE {<br>liberation:yahyaKhan schema:sameAs ?link .<br>SERVICE &lt;http://query.wikidata.org/sparql&gt; { <br>?link wdt:P580 ?startTime .<br>?link wdt:P582 ?endTime .<br>}<br>}'
+]
+        questionsList.addEventListener('click', (event) => {
+            query.style.display = 'block'
+            resultBox.style.display = 'none'
+            executeButton.textContent = 'Execute';
+            const target = event.target;
+            if (target.tagName === 'LI') {
+                selectedQuery = target.getAttribute('data-query');
+                sparqlQueryBox.innerHTML = queries[Number(selectedQuery)]
+            }
+        });
+
+        // Display query result when the execute button is clicked
+        executeButton.addEventListener('click', () => {
+            if (selectedQuery !== '') {
+                query.style.display = 'none'
+                resultBox.style.display = 'block'
+                resultBox.textContent = `Result for the query: "${selectedQuery}" will be shown here.`;
+                const queryParams = new URLSearchParams({
+                    query: sparqlQueryBox.innerHTML
+                });
+
+                // Make the API call
+                fetch(`http://liberation-kg.vercel.app/execute?query=${encodeURIComponent(sparqlQueryBox.innerHTML)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json(); 
+                })
+                .then(data => {
+                    // console.log('Data:', data);
+                    const result = data?.results?.bindings
+                    console.log(result) 
+                    let table = `
+                    <table>
+                        <thead>
+                            ${Object.keys(result[0]).map(item=>'<th>'+item+'</th>')}
+                        </thead>
+                        <tbody>
+                            ${result.map(item=> '<tr>' +
+                                Object.keys(item).map(dt => '<td>' + item[dt]['value'] + '</td>') +
+                                '</tr>'
+                            )}
+                        </tbody>
+                    </table>
+                    `
+                    resultBox.innerHTML = table
+                })
+                } 
+            else {
+                resultBox.textContent = 'Please select a question to execute the query.';
+            }
+        });
+
+    </script>
+</body>
+</html>
