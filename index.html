@@ -114,7 +114,7 @@
                 <li data-query="2">Who was the Prime Minister of India during the 1971 Liberation War?</li>
                 <li data-query="3">Who was the acting President of Bangladesh after its independence?</li>
                 <li data-query="4">Which two countries were involved in the potential border conflict mentioned in the document?</li>
-                <!-- <li data-query="5">When Yahya became president and when did he resign? -->
+                <li data-query="5">When Yahya became president and when did he resign?
                 </li>
             </ul>
         </div>
@@ -157,7 +157,7 @@
             'PREFIX schema: &lt;http://schema.org/&gt; <br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT *<br>WHERE {<br>  ?PrimeMinister schema:jobTitle "Prime Minister of India" .<br>  ?PrimeMinister schema:name ?Name<br>}',
             'PREFIX schema:&lt;http://schema.org/&gt;<br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT *<br>WHERE{<br>liberation:actingPresident schema:memberOf liberation:bangladeshGovernment.<br>liberation:actingPresident schema:name ?Name.<br>}',
             'PREFIX schema: &lt;http://schema.org/&gt;<br>PREFIX liberation:&lt;http://bike-csecu.com/datasets/liberation/&gt;<br><br>SELECT ?Namer>WHERE {<br>  liberation:borderClash schema:location ?country .<br>  ?country schema:name ?Name<br>}',
-            // 'PREFIX liberation: &lt;http://bike-csecu.com/datasets/liberation/&gt;<br>PREFIX schema: &lt;http://schema.org/&gt;<br>PREFIX wdt: &lt;http://www.wikidata.org/prop/direct/&gt;<br><br>SELECT *<br>WHERE {<br>liberation:yahyaKhan schema:sameAs ?link .<br>SERVICE &lt;http://query.wikidata.org/sparql&gt; { <br>?link wdt:P580 ?startTime .<br>?link wdt:P582 ?endTime .<br>}<br>}'
+            'PREFIX liberation: &lt;http://bike-csecu.com/datasets/liberation/&gt; <br> PREFIX schema: &lt;http://schema.org/&gt; <br> PREFIX wdt: &lt;http://www.wikidata.org/prop/direct/&gt; <br> PREFIX s: &lt;http://www.wikidata.org/entity/statement/&gt; <br> PREFIX wikibase: &lt;http://wikiba.se/ontology#&gt; <br> PREFIX ps: &lt;http://www.wikidata.org/prop/statement/&gt; <br> PREFIX wd: &lt;http://www.wikidata.org/entity/&gt; <br> PREFIX pq: &lt;http://www.wikidata.org/prop/qualifier/&gt; <br> PREFIX p: &lt;http://www.wikidata.org/prop/&gt; <br> PREFIX xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; <br> SELECT ?link (xsd:dateTime(?startTime) AS ?StartDate) (xsd:dateTime(?endTime) AS ?EndDate) WHERE { liberation:yahyaKhan schema:sameAs ?link. SERVICE &lt;https://query.wikidata.org/sparql&gt; { ?link p:P39 ?o. ?o a ?statement; ps:P39 wd:Q473984; pq:P580 ?startTime; pq:P582 ?endTime. } }'
 ]
         questionsList.addEventListener('click', (event) => {
             query.style.display = 'block'
